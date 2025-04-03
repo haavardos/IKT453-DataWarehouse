@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./movielens:/movielens
+      - mongodb_data:/data/db  
+
+  flask_api:
+    build:
+      context: ./mongodb_dw
+      dockerfile: Dockerfile  
+    container_name: flask_api
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend 
+    container_name: frontend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - flask_api
+      - supabase_api
+      - neo4j_api
+
+  supabase_api:
+    image: nginx 
+    container_name: supabase_api
+    ports:
+      - "5050:80"
+
+  neo4j_api:
+    image: nginx  
+    container_name: neo4j_api
+    ports:
+      - "6060:80"
+
+volumes:
+  mongodb_data:
