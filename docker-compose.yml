@@ -33,9 +33,10 @@ services:
 
   supabase_api:
     image: nginx 
+    dockerfile: Dockerfile  
     container_name: supabase_api
     ports:
-      - "5050:80"
+      - "5050:5050"
 
 # 4) Actual Neo4j database (the official DB image)
   neo4j:
