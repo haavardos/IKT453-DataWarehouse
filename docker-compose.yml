@@ -37,11 +37,28 @@ services:
     ports:
       - "5050:80"
 
+# 4) Actual Neo4j database (the official DB image)
+  neo4j:
+    image: neo4j:5.5
+    container_name: neo4j
+    environment:
+      # set user/pass here or use NEO4J_AUTH
+      NEO4J_AUTH: "neo4j/password"
+    ports:
+      - "7474:7474"  # Browser
+      - "7687:7687"  # Bolt port for driver
+
+  # ─────────────────────────────────────────────────────────
+  # 5) Your Neo4j-based Flask API (build from your neo4j folder)
   neo4j_api:
-    image: nginx  
+    build:
+      context: ./neo4j
+      dockerfile: Dockerfile  # the Dockerfile in the neo4j folder
     container_name: neo4j_api
     ports:
-      - "6060:80"
+      - "6060:6060"  # Expose port 6060 for Flask
+    depends_on:
+      - neo4j
 
 volumes:
   mongodb_data:
