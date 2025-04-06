@@ -48,7 +48,7 @@ for _, row in tqdm(movies.iterrows(), total=len(movies)):
     batch.append(document)
 
     if len(batch) >= batch_size:
-        collection.insert_many(batch)but 
+        collection.insert_many(batch)
         batch = []
 
 # Insert any remaining documents
