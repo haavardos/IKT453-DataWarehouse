@@ -10,10 +10,10 @@ collection = db["movies_optimized"]
 collection.drop() 
 
 # Load CSV files
-movies = pd.read_csv("../movielens/movies.csv")
-ratings = pd.read_csv("../movielens/ratings.csv")
-tags = pd.read_csv("../movielens/tags.csv")
-links = pd.read_csv("../movielens/links.csv")
+movies = pd.read_csv("movielens/movies.csv")
+ratings = pd.read_csv("movielens/ratings.csv")
+tags = pd.read_csv("movielens/tags.csv")
+links = pd.read_csv("movielens/links.csv")
 
 #Convert timestamps to 'YYYY-MM-DD' format
 ratings["date"] = ratings["timestamp"].apply(lambda ts: datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d'))
