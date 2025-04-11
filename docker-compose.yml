@@ -29,16 +29,6 @@ services:
       - supabase_api
       - neo4j_api
 
-  supabase_api:
-    build:
-      context: ./supabase_dw
-      dockerfile: Dockerfile
-    container_name: supabase_api
-    ports:
-      - "5050:5050"
-    depends_on:
-      - postgres_supabase
-
   postgres_supabase:
     image: postgres:15
     container_name: postgres_supabase
@@ -47,8 +37,52 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: evtoqEb6YUflIeC0
       POSTGRES_DB: postgres
+      # Add these to enable network connections
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata_supabase:/var/lib/postgresql/data
+      - ./movielens:/movielens
+    # Simpler healthcheck
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+      
+  supabase_api:
+    build:
+      context: ./supabase_dw
+      dockerfile: Dockerfile
+    container_name: supabase_api
+    networks:
+      default:
+        aliases:
+          - supabase_backend
+    depends_on:
+      postgres_supabase:
+        condition: service_healthy
+    environment:
+      SUPABASE_DB_HOST: postgres_supabase
+      SUPABASE_DB_NAME: postgres
+      SUPABASE_DB_USER: postgres
+      SUPABASE_DB_PASSWORD: evtoqEb6YUflIeC0
+      SUPABASE_DB_PORT: 5432
+      LOAD_DATA: "true"
+    volumes:
+      - ./movielens:/app/movielens
+    ports:
+      - "5050:5050"
+    # Add healthcheck for supabase_api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     
   
 # 4) Actual Neo4j database (the official DB image)
