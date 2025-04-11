@@ -9,7 +9,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy your Flask app code
 COPY supabase_api.py /app/
+COPY load_supabase.py /app/
 
+# Expose the port the app runs on
 EXPOSE 5050
 
-CMD ["python", "supabase_api.py"]
+# Install netcat for the health check
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+# Copy and make the startup script executable
+COPY startup.sh /app/startup.sh
+RUN chmod +x /app/startup.sh
+
+# Command to run the startup script
+CMD ["/app/startup.sh"]
