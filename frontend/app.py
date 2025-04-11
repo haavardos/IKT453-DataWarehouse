@@ -7,7 +7,7 @@ server = app.server  # For Docker compatibility
 
 # Backend endpoints
 BACKEND_ENDPOINTS = {
-    'mongodb': 'http://flask_api:5000',
+    'mongodb': 'http://mongo_api:5000',
     'supabase': 'http://supabase_api:5050',
     'neo4j': 'http://neo4j_api:6060'
 }

@@ -4,13 +4,13 @@ import time
 
 producer = KafkaProducer(
     #Change to your ip address
-    bootstrap_servers='10.0.0.4:29092', 
+    bootstrap_servers='192.168.1.204:29092', 
     api_version=(2, 0, 2),
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
 message = {
-    "movieId": 199999,
+    "movieId": 1000000,
     "title": "Kafka the Movie",
     "genres": ["Fantasy", "Mystery"],
     "ratings": [

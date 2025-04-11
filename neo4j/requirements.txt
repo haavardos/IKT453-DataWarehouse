@@ -1,2 +1,4 @@
 Flask
 neo4j
+pandas
+tqdm

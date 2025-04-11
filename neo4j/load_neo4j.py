@@ -4,14 +4,14 @@ from datetime import datetime
 from tqdm import tqdm
 
 # === CONFIGURATION ===
-NEO4J_URI = "bolt://localhost:7687"
+NEO4J_URI = "bolt://neo4j:7687"
 NEO4J_USER = "neo4j"
 NEO4J_PASSWORD = "password"
 
-MOVIES_CSV_PATH = "../movielens/movies.csv"
-RATINGS_CSV_PATH = "../movielens/ratings.csv"
-TAGS_CSV_PATH = "../movielens/tags.csv"
-LINKS_CSV_PATH = "../movielens/links.csv"
+MOVIES_CSV_PATH = "movielens/movies.csv"
+RATINGS_CSV_PATH = "movielens/ratings.csv"
+TAGS_CSV_PATH = "movielens/tags.csv"
+LINKS_CSV_PATH = "movielens/links.csv"
 
 BATCH_SIZE = 1000
 
