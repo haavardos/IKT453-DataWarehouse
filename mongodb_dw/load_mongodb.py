@@ -4,7 +4,7 @@ from datetime import datetime
 from tqdm import tqdm
 
 # Setup MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb://mongodb:27017/")
 db = client["movielens"]
 collection = db["movies_optimized"]
 collection.drop() 

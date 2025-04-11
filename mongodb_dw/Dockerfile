@@ -2,14 +2,20 @@ FROM python:3.9
 
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt requirements.txt
-
 # Install dependencies
-RUN pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all project files into the container
+# Copy project files
 COPY . .
 
-# Run the Flask app
-CMD ["python", "flask_api.py"]
+# Install netcat (for the startup check)
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+# Make startup script executable
+RUN chmod +x startup.sh
+
+# Expose Flask API port
+EXPOSE 5000
+
+CMD ["./startup.sh"]

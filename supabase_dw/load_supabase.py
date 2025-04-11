@@ -14,10 +14,10 @@ SUPABASE_USER = os.getenv("SUPABASE_DB_USER", "postgres")
 SUPABASE_PASSWORD = os.getenv("SUPABASE_DB_PASSWORD", "evtoqEb6YUflIeC0")
 SUPABASE_PORT = os.getenv("SUPABASE_DB_PORT", "5432")
 
-MOVIES_CSV_PATH = "../movielens/movies.csv"
-RATINGS_CSV_PATH = "../movielens/ratings.csv"
-TAGS_CSV_PATH = "../movielens/tags.csv"
-LINKS_CSV_PATH = "../movielens/links.csv"
+MOVIES_CSV_PATH = "movielens/movies.csv"
+RATINGS_CSV_PATH = "movielens/ratings.csv"
+TAGS_CSV_PATH = "movielens/tags.csv"
+LINKS_CSV_PATH = "movielens/links.csv"
 
 BATCH_SIZE = 1000
 
