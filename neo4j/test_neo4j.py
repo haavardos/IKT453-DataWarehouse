@@ -7,7 +7,7 @@ from kafka import KafkaProducer
 API_URL = "http://localhost:6060"  
 MOVIE_ID = 99988
 KAFKA_TOPIC = "neo4j_movies"
-KAFKA_BOOTSTRAP_SERVER = "localhost:29092"
+KAFKA_BOOTSTRAP_SERVER = "10.0.0.7:29092"
 
 # === FUNCTIONS ===
 
