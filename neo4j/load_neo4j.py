@@ -2,7 +2,7 @@ import pandas as pd
 from neo4j import GraphDatabase
 from datetime import datetime
 from tqdm import tqdm
-
+import time
 # === CONFIGURATION ===
 NEO4J_URI = "bolt://neo4j:7687"
 NEO4J_USER = "neo4j"
@@ -161,6 +161,7 @@ def _run_batch(session, batch):
 
 
 def main():
+    start = time.time()
     # --- Connect to Neo4j ---
     driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
@@ -186,7 +187,8 @@ def main():
         # 3. Load Tags (User -> [TAGGED] -> Movie)
         load_tags(session, tags)
 
-    print("Finished loading Neo4j!")
+    end = time.time()
+    print(f"Neo4j loading took {end - start:.2f} seconds")
 
 
 if __name__ == "__main__":

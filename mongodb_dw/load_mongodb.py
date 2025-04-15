@@ -2,7 +2,9 @@ import pandas as pd
 from pymongo import MongoClient
 from datetime import datetime
 from tqdm import tqdm
-
+import time
+start = time.time()
+print("Starting MongoDB load...")
 # Setup MongoDB connection
 client = MongoClient("mongodb://mongodb:27017/")
 db = client["movielens"]
@@ -55,4 +57,4 @@ for _, row in tqdm(movies.iterrows(), total=len(movies)):
 if batch:
     collection.insert_many(batch)
 
-print("Finished loading MongoDB!")
+print(f" Finished loading MongoDB in {time.time() - start:.2f} seconds!")

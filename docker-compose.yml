@@ -155,8 +155,21 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       MONGO_URI: mongodb://mongodb:27017/
 
-
-
+  kafka_supabase_consumer:
+    build:
+      context: ./datastreaming
+    container_name: kafka_supabase_consumer
+    depends_on:
+      - kafka
+      - postgres_supabase
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SUPABASE_DB_HOST: postgres_supabase
+      SUPABASE_DB_NAME: postgres
+      SUPABASE_DB_USER: postgres
+      SUPABASE_DB_PASSWORD: evtoqEb6YUflIeC0
+      SUPABASE_DB_PORT: 5432
+    command: ["python", "-u", "consumer_supabase.py"]
 volumes:
   mongodb_data:
   pgdata_supabase:

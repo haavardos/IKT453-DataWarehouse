@@ -40,6 +40,8 @@ app.layout = html.Div([
                 {'label': 'Get Ratings by Movie ID', 'value': 'ratings-by-id'},
                 {'label': 'Get Tags by Movie ID', 'value': 'tags-by-id'},
                 {'label': 'User Recommendations', 'value': 'recommendations-by-user'},
+                {'label': 'Average Rating by Genre', 'value': 'avg-rating-by-genre'},
+
             ],
             value='top-rated',
             style={'marginBottom': '20px'}
@@ -134,7 +136,20 @@ def update_output(n_clicks, backend, query_type, extra_param):
                         'data': [{'x': list(counts.keys()), 'y': list(counts.values()), 'type': 'bar'}],
                         'layout': {'title': 'Rating Distribution'}
                     }
+        elif query_type == 'avg-rating-by-genre' and isinstance(data, list):
+            sorted_data = sorted(data, key=lambda x: x.get("avgGenreRating", 0), reverse=True)
 
+            labels = [item.get('genre', 'N/A') for item in sorted_data]
+            values = [item.get('avgGenreRating', 0) for item in sorted_data]
+
+            fig = {
+                'data': [{'x': labels, 'y': values, 'type': 'bar'}],
+                'layout': {
+                    'title': 'Average Rating by Genre',
+                    'xaxis': {'title': 'Genre'},
+                    'yaxis': {'title': 'Average Rating'}
+                }
+            }
         # Hide ratings from JSON/table
         if isinstance(data, dict) and 'ratings' in data:
             data = {k: v for k, v in data.items() if k != 'ratings'}

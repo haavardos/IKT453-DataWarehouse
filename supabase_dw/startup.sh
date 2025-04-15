@@ -18,7 +18,7 @@ done
 echo "PostgreSQL is up - executing command"
 
 # Run the data loading script if environment variable is set
-if [ "$LOAD_DATA" = "false" ]; then
+if [ "$LOAD_DATA" = "true" ]; then
   echo "Loading data into PostgreSQL..."
   python load_supabase.py
   echo "Data loading complete"

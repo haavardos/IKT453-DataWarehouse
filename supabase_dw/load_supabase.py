@@ -308,6 +308,7 @@ def execute_batch(cur, query, args_list):
             raise
 
 def main():
+    start_time = time.time()
     try:
         # Load CSV files
         print("Loading CSV files...")
@@ -356,6 +357,8 @@ def main():
             if conn:
                 conn.close()
                 print("Database connection closed.")
+            end_time = time.time()
+            print(f"Total loading time: {round(end_time - start_time, 2)} seconds")
     except Exception as e:
         print(f"Error in main: {e}")
 
