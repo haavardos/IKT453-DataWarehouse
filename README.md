@@ -18,7 +18,7 @@ It also supports:
 - Full Docker setup for local deployment
 
 ## Folder Structure
-
+```
 project/
     - data/                  # MovieLens 100K dataset (CSV files)
     - mongo_dw/              # MongoDB loader, API, consumer
@@ -27,7 +27,7 @@ project/
     - datastreaming/         # Kafka producer/consumer
     - frontend/              # Dash front-end
     - docker-compose.yml     # Full stack configuration
-    
+```   
 
 ## How to Run
 
