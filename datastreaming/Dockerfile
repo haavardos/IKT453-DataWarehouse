@@ -14,4 +14,4 @@ COPY consumer_neo4j.py .
 COPY producer_neo4j.py .
 
 RUN pip install kafka-python pymongo psycopg2-binary neo4j
-CMD ["python", "-u", "consumer_mongo.py"]
+CMD ["python", "-u", "consumer_mongo.py", "consumer_neo4j.py"]

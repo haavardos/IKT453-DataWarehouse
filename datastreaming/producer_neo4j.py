@@ -1,23 +1,29 @@
-from kafka import KafkaProducer
 import json
+from kafka import KafkaProducer
 
-producer = KafkaProducer(
-    bootstrap_servers="localhost:29092",  
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
-)
+# === Configuration ===
+KAFKA_TOPIC = "neo4j_movies"
+KAFKA_BOOTSTRAP_SERVER = "10.0.0.7:29092"
+MOVIE_ID = 99988
 
-message = {
-    "movieId": 123456789,
-    "title": "Kafka Test Movie - Neo4j",
-    "genres": ["Drama", "Test"],
-    "ratings": [{"userId": 1, "rating": 4.0, "date": "2025-04-15"}],
+# === Kafka Message ===
+movie_data = {
+    "movieId": MOVIE_ID,
+    "title": "Kafka Consumer Movie - Neo4j Edition",
+    "genres": ["Test"],
+    "ratings": [{"userId": 1, "rating": 4.5, "date": "2025-04-15"}],
     "tags": [{"userId": 1, "tag": "test", "date": "2025-04-15"}],
-    "links": {
-        "imdbId": "tt1234567",
-        "tmdbId": "123456"
-    }
+    "links": {"imdbId": "tt9999999", "tmdbId": "99999"}
 }
 
-producer.send("neo4j_movies", message)
+# === Producer ===
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
+
+producer.send(KAFKA_TOPIC, movie_data)
 producer.flush()
-print("Test movie sent to Kafka (neo4j_movies)")
+
+print(f"Sent movie (ID: {MOVIE_ID}) to Kafka topic '{KAFKA_TOPIC}'.")
+
