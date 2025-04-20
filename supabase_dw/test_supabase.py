@@ -96,10 +96,10 @@ def measure_postgres_db_size():
 
 # === MAIN SCRIPT ===
 
-# 1. Measure Query Times
+# 1. Measure query times
 test_all_endpoints(movie_id=1, user_id=1)
 
-# 2. Kafka Stream Time
+# 2. Kafka stream time
 print("\nKafka streaming test:")
 start_time = time.time()
 start_id = send_kafka_message(MOVIE_ID)
@@ -108,6 +108,6 @@ total_delay = time.time() - start_time
 
 print(f"Kafka to API delay: {total_delay:.2f}s" if delay else "Movie not found in time.")
 
-# 3. Database Size
+# 3. Database size
 size = measure_postgres_db_size()
 print(f"PostgreSQL (Supabase) storage used: {size} MB")

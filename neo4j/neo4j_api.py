@@ -62,7 +62,7 @@ def get_movie_by_id(movie_id):
     movie['avgRating'] = round(sum(rating_values)/len(rating_values), 2) if rating_values else None
     movie['ratingCount'] = len(rating_values)
 
-    # Turn imdbId/tmdbId into a links dict to mimic your Mongo code
+    # Turn imdbId/tmdbId into a links dict
     links = {}
     if movie.get('imdbId'):
         links['imdbId'] = movie.pop('imdbId')
@@ -116,8 +116,9 @@ def get_movie_tags(movie_id):
 def get_top_rated():
     query = """
         MATCH (m:Movie)<-[r:RATED]-(u:User)
-        WITH m, avg(r.rating) AS avgRating
-        RETURN m.movieId AS movieId, m.title AS title, avgRating
+        WITH m, count(r) AS ratingCount, avg(r.rating) AS avgRating
+        WHERE ratingCount >= 25
+        RETURN m.movieId AS movieId, m.title AS title, avgRating, ratingCount
         ORDER BY avgRating DESC
         LIMIT 10
     """

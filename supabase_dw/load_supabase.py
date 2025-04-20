@@ -8,7 +8,7 @@ import time
 
 # === CONFIGURATION ===
 # For local Docker PostgreSQL container
-SUPABASE_HOST = os.getenv("SUPABASE_DB_HOST", "postgres_supabase")  # Use container name
+SUPABASE_HOST = os.getenv("SUPABASE_DB_HOST", "postgres_supabase")  
 SUPABASE_DB = os.getenv("SUPABASE_DB_NAME", "postgres")
 SUPABASE_USER = os.getenv("SUPABASE_DB_USER", "postgres")
 SUPABASE_PASSWORD = os.getenv("SUPABASE_DB_PASSWORD", "evtoqEb6YUflIeC0")
@@ -25,7 +25,7 @@ def get_connection():
     """Establish connection to the Supabase PostgreSQL database"""
     # Add retry logic for Docker environment (containers may start at different times)
     max_retries = 5
-    retry_delay = 5  # seconds
+    retry_delay = 5 
     
     for attempt in range(max_retries):
         try:

@@ -80,7 +80,7 @@ def get_most_rated_movies():
     ]))
     return jsonify(most_rated)
 
-# 🔹 User-based recommendations
+#User-based recommendations get all moves a user has rated above 4
 @app.route('/user-recommendations/<int:user_id>', methods=['GET'])
 def get_user_recommendations(user_id):
     recommended_movies = list(db.movies_optimized.aggregate([

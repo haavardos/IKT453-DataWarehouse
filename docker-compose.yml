@@ -45,7 +45,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: evtoqEb6YUflIeC0
       POSTGRES_DB: postgres
-      # Add these to enable network connections
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
@@ -53,7 +52,6 @@ services:
     volumes:
       - pgdata_supabase:/var/lib/postgresql/data
       - ./movielens:/movielens
-    # Simpler healthcheck
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -79,12 +77,11 @@ services:
       SUPABASE_DB_USER: postgres
       SUPABASE_DB_PASSWORD: evtoqEb6YUflIeC0
       SUPABASE_DB_PORT: 5432
-      LOAD_DATA: "false"
+      LOAD_DATA: "true"
     volumes:
       - ./movielens:/app/movielens
     ports:
       - "5050:5050"
-    # Add healthcheck for supabase_api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5050/"]
       interval: 10s
@@ -93,28 +90,26 @@ services:
       start_period: 10s
     
   
-# 4) Actual Neo4j database (the official DB image)
+
   neo4j:
     image: neo4j:5.5
     container_name: neo4j
     environment:
-      # set user/pass here or use NEO4J_AUTH
       NEO4J_AUTH: "neo4j/password"
     ports:
-      - "7474:7474"  # Browser
-      - "7687:7687"  # Bolt port for driver
+      - "7474:7474"  
+      - "7687:7687"  
     volumes:
       - neo4j_data:/data
 
-  # ─────────────────────────────────────────────────────────
-  # 5) Your Neo4j-based Flask API (build from your neo4j folder)
+
   neo4j_api:
     build:
       context: ./neo4j
-      dockerfile: Dockerfile  # the Dockerfile in the neo4j folder
+      dockerfile: Dockerfile
     container_name: neo4j_api
     ports:
-      - "6060:6060"  # Expose port 6060 for Flask
+      - "6060:6060"
     depends_on:
       - neo4j
     volumes:
@@ -139,7 +134,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://10.0.0.7:29092 #Change to your ip address 10.0.0.7, 192.168.1.204
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://192.168.1.204:29092 #Change to your ip address
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

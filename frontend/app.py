@@ -3,7 +3,7 @@ import requests
 import json
 from collections import Counter
 app = Dash(__name__, suppress_callback_exceptions=True)
-server = app.server  # For Docker compatibility
+server = app.server 
 
 # Backend endpoints
 BACKEND_ENDPOINTS = {

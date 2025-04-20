@@ -2,13 +2,15 @@ import time
 import json
 import requests
 from kafka import KafkaProducer
-
+from neo4j import GraphDatabase
 # === CONFIG ===
 API_URL = "http://localhost:6060"  
-MOVIE_ID = 99988
+MOVIE_ID = 99999
 KAFKA_TOPIC = "neo4j_movies"
-KAFKA_BOOTSTRAP_SERVER = "10.0.0.7:29092"
-
+KAFKA_BOOTSTRAP_SERVER = "192.168.1.204:29092" #Your local ip address
+NEO4J_URI = "bolt://localhost:7687"
+NEO4J_USER = "neo4j"
+NEO4J_PASSWORD = "password"
 # === FUNCTIONS ===
 
 def test_all_endpoints(movie_id=1, user_id=1, runs=3):
@@ -69,6 +71,11 @@ def poll_api_for_movie(movie_id, timeout=30):
         timeout -= 1
     return None
 
+def measure_neo4j_db_size():
+    driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    with driver.session() as session:
+        size_info = session.run("CALL db.stats.retrieve('GRAPH COUNTS') YIELD data RETURN data").single()
+        return size_info["data"]
 # === MAIN SCRIPT ===
 
 # 1. Measure Query Times
@@ -84,3 +91,10 @@ total_delay = time.time() - start_time
 print(f"Kafka to API delay: {total_delay:.2f}s" if delay else "Movie not found in time.")
 # 3. Database Size
 # Do this in terminal "docker exec neo4j du -sh /data"
+
+print("\n Neo4j Database Stats:")
+try:
+    stats = measure_neo4j_db_size()
+    print(stats)
+except Exception as e:
+    print(f" Failed to fetch DB stats: {e}")

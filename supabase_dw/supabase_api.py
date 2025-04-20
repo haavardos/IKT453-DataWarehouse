@@ -292,8 +292,10 @@ def get_top_rated():
             SELECT 
                 movie_id as "movieId", 
                 title, 
-                avg_rating as "avgRating"
+                avg_rating as "avgRating",
+                num_ratings as "ratingCount"
             FROM avg_rating_per_movie
+            WHERE num_ratings >= 25
             ORDER BY avg_rating DESC
             LIMIT 10
         """)

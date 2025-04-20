@@ -29,7 +29,7 @@ consumer = KafkaConsumer(
 def get_db_connection():
     """Create a connection to the Supabase PostgreSQL database"""
     max_retries = 5
-    retry_delay = 5  # seconds
+    retry_delay = 5 
     
     for attempt in range(max_retries):
         try:

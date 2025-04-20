@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install netcat for port check
 RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-# Copy your app
+# Copy app
 COPY . .
 
 # Make script executable
