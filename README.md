@@ -5,7 +5,7 @@ This project was done in the course IKT453-G 25V at University of Agder
 - Håvard Østebø (MongoDB)
 - Erik Bakken (Neo4j)
 
-# MovieLens Data Warehouse Project (IKT553)
+# MovieLens Data Warehouse Project (IKT453)
 
 This project creates and compares three different data warehouse solutions using three different technologies:
 - Supabase (PostgreSQL – relational)
