@@ -119,6 +119,16 @@ def create_schema(conn):
         JOIN fact_ratings r ON m.movie_id = r.movie_id
         GROUP BY m.movie_id, m.title
         """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS movie_summary (
+            movie_id INT PRIMARY KEY,
+            title TEXT,
+            avg_rating NUMERIC(3, 2),
+            num_ratings INT,
+            num_tags INT,
+            distinct_users INT
+        )
+        """)
         
         conn.commit()
         print("Schema created successfully!")
