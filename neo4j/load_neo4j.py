@@ -3,84 +3,109 @@ from neo4j import GraphDatabase
 from datetime import datetime
 from tqdm import tqdm
 import time
+
 # === CONFIGURATION ===
-NEO4J_URI = "bolt://neo4j:7687"
+NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"
 NEO4J_PASSWORD = "password"
 
-MOVIES_CSV_PATH = "movielens/movies.csv"
-RATINGS_CSV_PATH = "movielens/ratings.csv"
-TAGS_CSV_PATH = "movielens/tags.csv"
-LINKS_CSV_PATH = "movielens/links.csv"
+MOVIES_CSV_PATH = "../movielens/movies.csv"
+RATINGS_CSV_PATH = "../movielens/ratings.csv"
+TAGS_CSV_PATH = "../movielens/tags.csv"
+LINKS_CSV_PATH = "../movielens/links.csv"
 
 BATCH_SIZE = 1000
 
 
 def create_indexes_and_constraints(session):
-    """
-    Create indexes/constraints to speed up MERGE operations
-    and ensure uniqueness for Movie and User nodes.
-    """
     session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (m:Movie) REQUIRE m.movieId IS UNIQUE")
     session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (u:User) REQUIRE u.userId IS UNIQUE")
+    session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (g:Genre) REQUIRE g.name IS UNIQUE")
 
 
 def clear_database(session):
-    """
-    (Optional) Clear the entire database, removing all existing data.
-    """
     session.run("MATCH (n) DETACH DELETE n")
 
 
 def load_movies(session, movies_df, links_df):
-    """
-    Create (or merge) Movie nodes in Neo4j.
-    Store movieId, title, genres, and any link info (imdbId, tmdbId).
-    """
     links_dict = links_df.set_index("movieId").to_dict("index")
 
-    batch = []
+    movie_batch = []
+    genre_batch = set()
+    relationship_batch = []
+
     for _, row in tqdm(movies_df.iterrows(), total=len(movies_df), desc="Movies"):
         movie_id = row["movieId"]
         title = row["title"]
         genres = row["genres"].split("|") if pd.notna(row["genres"]) else []
+        imdb_id = tmdb_id = None
 
-        imdb_id = None
-        tmdb_id = None
         if movie_id in links_dict:
             imdb_id = links_dict[movie_id].get("imdbId")
             tmdb_id = links_dict[movie_id].get("tmdbId")
 
-        # We'll batch the Cypher queries for better performance
-        cypher_query = (
+        # Extract year from title
+        year = None
+        if "(" in title and title.strip().endswith(")"):
+            try:
+                year = int(title.strip()[-5:-1])
+            except ValueError:
+                pass
+
+        # Movie MERGE query
+        movie_query = (
             "MERGE (m:Movie {movieId: $movieId}) "
-            "SET m.title = $title, m.genres = $genres, m.imdbId = $imdbId, m.tmdbId = $tmdbId"
+            "SET m.title = $title, m.genres = $genres, "
+            "m.imdbId = $imdbId, m.tmdbId = $tmdbId, m.year = $year"
         )
-        params = {
+        movie_params = {
             "movieId": int(movie_id),
             "title": title,
             "genres": genres,
             "imdbId": str(imdb_id) if pd.notna(imdb_id) else None,
             "tmdbId": str(tmdb_id) if pd.notna(tmdb_id) else None,
+            "year": year,
         }
-        batch.append((cypher_query, params))
+        movie_batch.append((movie_query, movie_params))
 
-        # Execute batch if it reached BATCH_SIZE
-        if len(batch) >= BATCH_SIZE:
-            _run_batch(session, batch)
-            batch = []
+        for genre in genres:
+            genre = genre.strip()
+            if genre:
+                genre_batch.add(genre)
+                relationship_batch.append({
+                    "movieId": int(movie_id),
+                    "genreName": genre
+                })
 
-    # Insert any remaining movies
-    if batch:
-        _run_batch(session, batch)
+        if len(movie_batch) >= BATCH_SIZE:
+            _run_batch(session, movie_batch)
+            _create_genres_and_relationships(session, genre_batch, relationship_batch)
+            movie_batch = []
+            genre_batch = set()
+            relationship_batch = []
+
+    if movie_batch:
+        _run_batch(session, movie_batch)
+        _create_genres_and_relationships(session, genre_batch, relationship_batch)
+
+
+def _create_genres_and_relationships(session, genre_set, relationship_list):
+    with session.begin_transaction() as tx:
+        for genre in genre_set:
+            tx.run("MERGE (:Genre {name: $name})", name=genre)
+        for rel in relationship_list:
+            tx.run(
+                """
+                MATCH (m:Movie {movieId: $movieId})
+                MATCH (g:Genre {name: $genreName})
+                MERGE (m)-[:IN_GENRE]->(g)
+                """,
+                movieId=rel["movieId"],
+                genreName=rel["genreName"]
+            )
 
 
 def load_ratings(session, ratings_df):
-    """
-    Create User nodes and RATED relationships to Movie nodes.
-    We'll store rating and date on the relationship.
-    """
-    # Convert timestamp to 'YYYY-MM-DD'
     ratings_df["date"] = ratings_df["timestamp"].apply(
         lambda ts: datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d')
     )
@@ -90,7 +115,7 @@ def load_ratings(session, ratings_df):
         user_id = int(row["userId"])
         movie_id = int(row["movieId"])
         rating = float(row["rating"])
-        date_str = row["date"]  # 'YYYY-MM-DD'
+        date_str = row["date"]
 
         cypher_query = (
             "MERGE (u:User {userId: $userId}) "
@@ -109,17 +134,11 @@ def load_ratings(session, ratings_df):
             _run_batch(session, batch)
             batch = []
 
-    # Insert any remaining relationships
     if batch:
         _run_batch(session, batch)
 
 
 def load_tags(session, tags_df):
-    """
-    Create TAGGED relationships to Movie nodes.
-    We'll store tag and date on the relationship.
-    """
-    # Convert timestamp to 'YYYY-MM-DD'
     tags_df["date"] = tags_df["timestamp"].apply(
         lambda ts: datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d')
     )
@@ -148,13 +167,11 @@ def load_tags(session, tags_df):
             _run_batch(session, batch)
             batch = []
 
-    # Insert any remaining relationships
     if batch:
         _run_batch(session, batch)
 
 
 def _run_batch(session, batch):
-    """ Helper function to run a batch of queries in a single transaction. """
     with session.begin_transaction() as tx:
         for query, params in batch:
             tx.run(query, **params)
@@ -162,29 +179,18 @@ def _run_batch(session, batch):
 
 def main():
     start = time.time()
-    # --- Connect to Neo4j ---
     driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
-    # --- Load CSV files into DataFrames ---
     movies = pd.read_csv(MOVIES_CSV_PATH)
     ratings = pd.read_csv(RATINGS_CSV_PATH)
     tags = pd.read_csv(TAGS_CSV_PATH)
     links = pd.read_csv(LINKS_CSV_PATH)
 
     with driver.session() as session:
-        # (Optional) Clear the entire database
         clear_database(session)
-
-        # Create constraints (will speed up merges and ensure unique IDs)
         create_indexes_and_constraints(session)
-
-        # 1. Load Movies (including link info)
         load_movies(session, movies, links)
-
-        # 2. Load Ratings (User -> [RATED] -> Movie)
         load_ratings(session, ratings)
-
-        # 3. Load Tags (User -> [TAGGED] -> Movie)
         load_tags(session, tags)
 
     end = time.time()
